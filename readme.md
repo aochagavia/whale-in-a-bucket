@@ -20,10 +20,10 @@ $ docker run --rm pub-40af5d7df1e0402d9a92b982a6599860.r2.dev/cowsay
 
 ### Getting started
 
-_Note: instead of using S3, we are using R2 for our examples. R2 buckets are much easier to expose
-securely to the internet on a dedicated domain name (which is necessary to `docker pull` from them).
-Fortunately, it doesn't matter whether you use R2 or S3, since they are API-compatible. As a matter
-of fact, we use _the AWS SDK_ in the code, yet we know it works flawlessly with R2 credentials!_
+_Note: instead of using S3, we are using R2 for our examples because of free egress traffic and
+slightly clearer docs. Fortunately, it doesn't matter whether you use R2 or S3, since they are
+API-compatible. As a matter of fact, we use _the AWS SDK_ in the code, yet we know it works
+flawlessly with R2 credentials!_
 
 Preparation:
 
@@ -45,8 +45,12 @@ cargo run --release -- --source-image alpine:latest --target-image alpine:latest
 Pull the container image from your bucket, using its public url:
 
 ```bash
-docker pull https://{your-bucket-url}/alpine:latest-mirrored
+# Note that the url shouldn't include the `https://` portion here
+docker pull {your-bucket-url}/alpine:latest-mirrored
 ```
+
+Note: if you are using S3, you can `docker pull
+{your-bucket-name}.s3.amazonaws.com/alpine:latest-mirrored`.
 
 ### Limitations
 
