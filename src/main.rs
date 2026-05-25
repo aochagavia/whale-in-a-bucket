@@ -20,8 +20,10 @@ struct Opts {
     source_image: Reference,
     /// The reference the container image will have on your mirror, without including the path to
     /// the registry (e.g. `debian:bookworm-slim-mirrored`)
+    ///
+    /// If omitted, the source image reference is reused as the target reference
     #[arg(long)]
-    target_image: Reference,
+    target_image: Option<Reference>,
     /// The name of the bucket where the container image will be stored
     #[arg(long)]
     target_bucket: String,
@@ -39,7 +41,10 @@ fn main() -> anyhow::Result<()> {
 
 async fn run(opts: Opts) -> anyhow::Result<()> {
     let source_image_ref = opts.source_image;
-    let target_repository = opts.target_image.repository();
+    let target_image_ref = opts
+        .target_image
+        .unwrap_or_else(|| source_image_ref.clone());
+    let target_repository = target_image_ref.repository();
     let target_bucket = opts.target_bucket;
 
     println!("Configuration:");
@@ -47,7 +52,7 @@ async fn run(opts: Opts) -> anyhow::Result<()> {
     println!("* Target bucket: {target_bucket}");
     println!(
         "* Target image: `{}`",
-        display_target_image(&opts.target_image)
+        display_target_image(&target_image_ref)
     );
 
     // Pull the image's root manifest, associated to the provided tag or digest
@@ -77,7 +82,7 @@ async fn run(opts: Opts) -> anyhow::Result<()> {
         // We handle image manifests in a later step
         OciManifest::Image(image) => image_manifests.push((image, manifest_raw, manifest_digest)),
         OciManifest::ImageIndex(image_index) => {
-            if let Some(target_tag) = opts.target_image.tag() {
+            if let Some(target_tag) = target_image_ref.tag() {
                 // Push the index under its tag name, if the target image uses a tag at all
                 r2_client
                     .put_object()

@@ -1,7 +1,7 @@
 # Whale in a bucket
 
 Experimental Rust tool to mirror container images from public registries to S3 (or S3-compatible)
-buckets. See the [original blog post](TODO) for the story behind it.
+buckets. See the [original blog post](https://ochagavia.nl/blog/using-s3-as-a-container-registry/) for the story behind it.
 
 ### Try it out
 
@@ -54,14 +54,18 @@ Note: if you are using S3, you can `docker pull
 
 ### Limitations
 
-The tool is meant as a proof-of-concept and has a bunch of minor limitations:
+The tool is meant as a proof-of-concept and has a bunch of minor limitations. Feel free to fork the
+repository and adapt the code! If you'd rather not get your hands dirty, know that I'm also
+developing custom container tools through my [consulting business](https://ochagavia.nl/).
+
+As for the limitations:
 
 - No effort has been made to speed things up and there's clear low-hanging fruit. In particular, it
   would be easy to parallelize downloads and uploads, but I wanted to keep the code easy to follow.
   Also, we could refrain from re-uploading layers that are already present in the target repository,
   but we currently re-upload them anyway.
 - There's no support for private registries. It would be very easy to add, but I didn't want to bloat
-  the tool. Feel free to fork the repository or adapt the code!
+  the tool.
 - Each layer is uploaded to the bucket in a single request, instead of using multipart uploads. Big
   enough layers will run into size limits, but that can also easily be fixed by switching to
   multipart uploads.
